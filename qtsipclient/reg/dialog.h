@@ -18,6 +18,7 @@ public:
 private:
     void uiConnect();
     void accConnect(MyAccount* acc);
+    void renew(bool b);
     Q_SLOT void onBtnReg();
     Q_SLOT void onBtnRenew();
     Q_SLOT void onBtnUnreg();

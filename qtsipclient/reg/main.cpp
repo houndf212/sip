@@ -18,7 +18,7 @@ void initEPconfig(bool bThread)
         //To make your application perform idle processing (by executing a special function whenever there are no pending events),
         //use a QTimer with 0 timeout.
 
-        //ep_cfg.uaConfig.threadCnt = 0;
+        ep_cfg.uaConfig.threadCnt = 0;
         ep_cfg.uaConfig.mainThreadOnly = true;
         QTimer *timer = new QTimer(qApp);
         // I do not know, so 100 is OK?
@@ -27,7 +27,10 @@ void initEPconfig(bool bThread)
                          [](){Endpoint::instance().libHandleEvents(k_interval);});
         timer->start(0);
     }
-    ep_cfg.logConfig.level = 3;
+//    ep_cfg.uaConfig.stunServer.push_back("192.168.7.234");
+//    ep_cfg.uaConfig.mwiUnsolicitedEnabled = false;
+    ep_cfg.uaConfig.userAgent = "pjsip with Qt";
+    ep_cfg.logConfig.level = 5;
     Endpoint::instance().libInit( ep_cfg );
 }
 
@@ -41,12 +44,12 @@ void initTransport()
         Q_ASSERT(udpid>=0);
     }
 
-    // Transport
+     //Transport
 //    {
 //        TransportConfig tcfg;
 ////        tcfg.port = 5060;
-//        TransportId tcpid = Endpoint.instance().transportCreate(PJSIP_TRANSPORT_TCP, tcfg);
-//    Q_ASSERT(tcpid>=0);
+//        TransportId tcpid = Endpoint::instance().transportCreate(PJSIP_TRANSPORT_TCP, tcfg);
+//        Q_ASSERT(tcpid>=0);
 //    }
 }
 
@@ -62,12 +65,12 @@ int main(int argc, char *argv[])
     regQtParam();
     QApplication a(argc, argv);
 
+//UaConfig
     Endpoint ep;
-
     try
     {
         ep.libCreate();
-        initEPconfig(false);
+        initEPconfig(true);
         initTransport();
         ep.libStart();
         // use Qt quit to call libdestory

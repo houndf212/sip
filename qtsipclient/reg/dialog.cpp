@@ -43,7 +43,19 @@ void Dialog::accConnect(MyAccount *acc)
             this, &Dialog::onRegStart);
 
 //    connect(acc, &MyAccount::sig_IM,
-//            this, &Dialog::onIM);
+    //            this, &Dialog::onIM);
+}
+
+void Dialog::renew(bool b)
+{
+    try
+    {
+        m_acc->setRegistration(b);
+    }
+    catch(pj::Error& e)
+    {
+        cout << e.reason <<endl;
+    }
 }
 
 void Dialog::onBtnReg()
@@ -74,7 +86,8 @@ void Dialog::onBtnRenew()
 {
     if (m_acc.isNull())
         return;
-    m_acc->setRegistration(true);
+
+    renew(true);
 }
 
 void Dialog::onBtnUnreg()
@@ -82,7 +95,7 @@ void Dialog::onBtnUnreg()
     if (m_acc.isNull())
         return;
     if (m_acc->getInfo().regIsActive)
-        m_acc->setRegistration(false);
+        renew(false);
 }
 
 void Dialog::onRegStart(OnRegStartedParam prm)
