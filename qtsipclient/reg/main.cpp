@@ -8,10 +8,25 @@
 using namespace std;
 using namespace pj;
 
-void initEPconfig()
+void initEPconfig(bool bThread)
 {
     // Init library
     EpConfig ep_cfg;
+    if (!bThread)
+    {
+        //in QCoreApplication::exec()
+        //To make your application perform idle processing (by executing a special function whenever there are no pending events),
+        //use a QTimer with 0 timeout.
+
+        //ep_cfg.uaConfig.threadCnt = 0;
+        ep_cfg.uaConfig.mainThreadOnly = true;
+        QTimer *timer = new QTimer(qApp);
+        // I do not know, so 100 is OK?
+        const int k_interval = 100;
+        QObject::connect(timer, &QTimer::timeout,
+                         [](){Endpoint::instance().libHandleEvents(k_interval);});
+        timer->start(0);
+    }
     ep_cfg.logConfig.level = 3;
     Endpoint::instance().libInit( ep_cfg );
 }
@@ -44,13 +59,21 @@ void regQtParam()
 
 int main(int argc, char *argv[])
 {
+    regQtParam();
+    QApplication a(argc, argv);
+
     Endpoint ep;
+
     try
     {
         ep.libCreate();
-        initEPconfig();
+        initEPconfig(false);
         initTransport();
         ep.libStart();
+        // use Qt quit to call libdestory
+        // or do nothing ~EndPoint() will do also
+        QObject::connect(&a, &QCoreApplication::aboutToQuit,
+                         [](){Endpoint::instance().libDestroy();});
     }
     catch (Error & err)
     {
@@ -58,11 +81,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    regQtParam();
-    QApplication a(argc, argv);
-
     Dialog w;
     w.show();
     qDebug() << "GUI thread: " << QThread::currentThread();
-    return a.exec();
+    int ret = a.exec();
+    qDebug() << "#### return main!";
+    return ret;
 }
