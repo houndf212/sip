@@ -33,10 +33,10 @@ void MyAccount::onRegState(OnRegStateParam &prm)
     Q_EMIT sig_RegStatus(prm);
 }
 
-//void MyAccount::onInstantMessage(OnInstantMessageParam &prm)
-//{
-//    Q_EMIT sig_IM(prm);
-//}
+void MyAccount::onInstantMessage(OnInstantMessageParam &prm)
+{
+    Q_EMIT sig_IM(prm);
+}
 
 //void MyAccount::onIncomingCall(OnIncomingCallParam &iprm)
 //{

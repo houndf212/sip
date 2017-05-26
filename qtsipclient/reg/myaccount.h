@@ -19,14 +19,14 @@ public:
 public:
     Q_SIGNAL void sig_RegStarted(OnRegStartedParam prm);
     Q_SIGNAL void sig_RegStatus(OnRegStateParam prm);
-//    Q_SIGNAL void sig_IM(OnInstantMessageParam prm);
+    Q_SIGNAL void sig_IM(OnInstantMessageParam prm);
     // Account interface
 public:
 //    virtual void onIncomingCall(OnIncomingCallParam &prm) override;
     virtual void onRegStarted(OnRegStartedParam &prm) override;
     virtual void onRegState(OnRegStateParam &prm) override;
 //    virtual void onIncomingSubscribe(OnIncomingSubscribeParam &prm) override;
-//    virtual void onInstantMessage(OnInstantMessageParam &prm) override;
+    virtual void onInstantMessage(OnInstantMessageParam &prm) override;
 //    virtual void onInstantMessageStatus(OnInstantMessageStatusParam &prm) override;
 //    virtual void onTypingIndication(OnTypingIndicationParam &prm) override;
 //    virtual void onMwiInfo(OnMwiInfoParam &prm) override;

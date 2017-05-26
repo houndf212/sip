@@ -12,7 +12,7 @@ Dialog::Dialog(QWidget *parent) :
     uiConnect();
     //test
     ui->txtIdUri->setText( "sip:1007@192.168.7.234" );
-    ui->txtDomain->setText( "sip:1007@192.168.7.234" );
+    ui->txtDomain->setText( "sip:192.168.7.234" );
     ui->txtAcc->setText( "1007" );
     ui->txtPwd->setText("1234");
 }
@@ -32,6 +32,9 @@ void Dialog::uiConnect()
 
     connect(ui->btnUnreg , &QPushButton::clicked,
             this, &Dialog::onBtnUnreg);
+
+    connect(ui->btnCleanIM, &QPushButton::clicked,
+            ui->txtIM, &QPlainTextEdit::clear);
 }
 
 void Dialog::accConnect(MyAccount *acc)
@@ -42,8 +45,8 @@ void Dialog::accConnect(MyAccount *acc)
     connect(acc, &MyAccount::sig_RegStarted,
             this, &Dialog::onRegStart);
 
-//    connect(acc, &MyAccount::sig_IM,
-    //            this, &Dialog::onIM);
+    connect(acc, &MyAccount::sig_IM,
+                this, &Dialog::onIM);
 }
 
 void Dialog::renew(bool b)
@@ -65,9 +68,11 @@ void Dialog::onBtnReg()
     acc_cfg.regConfig.registrarUri = ui->txtDomain->text().toStdString();
     string accstr = ui->txtAcc->text().toStdString();
     string pwd = ui->txtPwd->text().toStdString();
+
     acc_cfg.sipConfig.authCreds.push_back( AuthCredInfo("digest", "*",
                                                         accstr, 0, pwd) );
-
+    // TODO 不知道怎么添加别名 难道在 callconfig里面？
+//    acc_cfg.sipConfig.contactForced = "centos";
 
     MyAccount *acc = new MyAccount;
     accConnect(acc);
@@ -75,7 +80,7 @@ void Dialog::onBtnReg()
     m_acc.reset(acc);
     try
     {
-        acc->create(acc_cfg);
+        acc->create(acc_cfg, true);
     } catch(Error& err)
     {
         cout << "Account creation error: " << err.info() << endl;
@@ -120,10 +125,17 @@ void Dialog::onRegParam(OnRegStateParam prm)
     else
     {
         ui->lblReg->setText("Unreg");
+        m_acc.reset();
     }
 }
 
 void Dialog::onIM(OnInstantMessageParam prm)
 {
-    qDebug() << prm.rdata.wholeMsg.data();
+    if (prm.contentType == "text/plain")
+    {
+        QString time = QDateTime::currentDateTime().toString("hh:mm");
+        QString acc = QString::fromStdString(prm.fromUri);
+        QString msg = QString::fromStdString(prm.msgBody);
+        ui->txtIM->appendPlainText(time +":\n"+acc+" : "+msg);
+    }
 }

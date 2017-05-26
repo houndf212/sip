@@ -57,14 +57,14 @@ void regQtParam()
 {
     qRegisterMetaType<OnRegStateParam>("OnRegStateParam");
     qRegisterMetaType<OnRegStartedParam>("OnRegStartedParam");
-//    qRegisterMetaType<OnInstantMessageParam>("OnInstantMessageParam");
+    qRegisterMetaType<OnInstantMessageParam>("OnInstantMessageParam");
 }
 
 int main(int argc, char *argv[])
 {
     regQtParam();
     QApplication a(argc, argv);
-
+//Buddy
 //UaConfig
     Endpoint ep;
     try
