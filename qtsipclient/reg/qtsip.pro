@@ -26,10 +26,18 @@ LIBS += -lpjsua2-x86_64-unknown-linux-gnu -lstdc++ -lpjsua-x86_64-unknown-linux-
 SOURCES += main.cpp\
         dialog.cpp \
     myaccount.cpp \
-    mycall.cpp
+    mycall.cpp \
+    buddywidget.cpp \
+    mybuddy.cpp \
+    imdlg.cpp
 
 HEADERS  += dialog.h \
     myaccount.h \
-    mycall.h
+    mycall.h \
+    buddywidget.h \
+    mybuddy.h \
+    imdlg.h
 
-FORMS    += dialog.ui
+FORMS    += dialog.ui \
+    buddywidget.ui \
+    imdlg.ui

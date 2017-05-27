@@ -30,7 +30,7 @@ void initEPconfig(bool bThread)
 //    ep_cfg.uaConfig.stunServer.push_back("192.168.7.234");
 //    ep_cfg.uaConfig.mwiUnsolicitedEnabled = false;
     ep_cfg.uaConfig.userAgent = "pjsip with Qt";
-    ep_cfg.logConfig.level = 5;
+    ep_cfg.logConfig.level = 3;
     Endpoint::instance().libInit( ep_cfg );
 }
 
@@ -58,7 +58,9 @@ void regQtParam()
     qRegisterMetaType<OnRegStateParam>("OnRegStateParam");
     qRegisterMetaType<OnRegStartedParam>("OnRegStartedParam");
     qRegisterMetaType<OnInstantMessageParam>("OnInstantMessageParam");
+    qRegisterMetaType<OnInstantMessageStatusParam>("OnInstantMessageStatusParam");
 }
+
 
 int main(int argc, char *argv[])
 {

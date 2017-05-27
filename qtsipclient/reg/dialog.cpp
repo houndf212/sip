@@ -2,6 +2,7 @@
 #include "ui_dialog.h"
 #include <string>
 #include <iostream>
+#include "buddywidget.h"
 using namespace std;
 
 Dialog::Dialog(QWidget *parent) :
@@ -9,17 +10,36 @@ Dialog::Dialog(QWidget *parent) :
     ui(new Ui::Dialog)
 {
     ui->setupUi(this);
+    initOnlineCombo();
     uiConnect();
+    initBuddyArea();
     //test
     ui->txtIdUri->setText( "sip:1007@192.168.7.234" );
     ui->txtDomain->setText( "sip:192.168.7.234" );
     ui->txtAcc->setText( "1007" );
     ui->txtPwd->setText("1234");
+
+    ui->txtBuddy->setText("sip:1001@192.168.7.234");
+
+    resize(600, 400);
 }
 
 Dialog::~Dialog()
 {
     delete ui;
+}
+
+void Dialog::initOnlineCombo()
+{
+    ui->cmbOnlineStatus->addItem("Online");
+    ui->cmbOnlineStatus->addItem("Offline");
+    ui->cmbOnlineStatus->addItem("Away");
+    ui->cmbOnlineStatus->addItem("Busy");
+
+    typedef void (QComboBox::*MF)(const QString&);
+    MF mf = static_cast<MF>(&QComboBox::activated);
+    connect(ui->cmbOnlineStatus, mf,
+            this, &Dialog::onOnlieStatusChanged);
 }
 
 void Dialog::uiConnect()
@@ -35,6 +55,9 @@ void Dialog::uiConnect()
 
     connect(ui->btnCleanIM, &QPushButton::clicked,
             ui->txtIM, &QPlainTextEdit::clear);
+
+    connect(ui->btnAddBuddy, &QPushButton::clicked,
+            this, &Dialog::onBtnAddBuddy);
 }
 
 void Dialog::accConnect(MyAccount *acc)
@@ -46,7 +69,13 @@ void Dialog::accConnect(MyAccount *acc)
             this, &Dialog::onRegStart);
 
     connect(acc, &MyAccount::sig_IM,
-                this, &Dialog::onIM);
+            this, &Dialog::onIM);
+}
+
+void Dialog::initBuddyArea()
+{
+    QLayout* layout = new QVBoxLayout;
+    ui->buddyArea->widget()->setLayout(layout);
 }
 
 void Dialog::renew(bool b)
@@ -73,6 +102,9 @@ void Dialog::onBtnReg()
                                                         accstr, 0, pwd) );
     // TODO 不知道怎么添加别名 难道在 callconfig里面？
 //    acc_cfg.sipConfig.contactForced = "centos";
+
+    // pres
+    acc_cfg.presConfig.publishEnabled = true;
 
     MyAccount *acc = new MyAccount;
     accConnect(acc);
@@ -103,15 +135,32 @@ void Dialog::onBtnUnreg()
         renew(false);
 }
 
+void Dialog::onBtnAddBuddy()
+{
+    if (m_acc.isNull())
+        return;
+
+    string buddyuri = ui->txtBuddy->text().toStdString();
+    BuddyConfig bc;
+    bc.uri = buddyuri;
+    MyBuddy* buddy = new MyBuddy;
+    buddy->create(*m_acc.data(), bc);
+
+    BuddyWidget* bw = new BuddyWidget;
+    bw->setBuddy(m_acc.data(), buddy);
+    ui->buddyArea->widget()->layout()->addWidget(bw);
+    buddy->subscribePresence(true);
+
+}
+
 void Dialog::onRegStart(OnRegStartedParam prm)
 {
-    qDebug() << Q_FUNC_INFO <<" : "<<prm.renew;
+    qDebug() << Q_FUNC_INFO;
 }
 
 void Dialog::onRegParam(OnRegStateParam prm)
 {
     qDebug() << Q_FUNC_INFO;
-    qDebug() << QThread::currentThread();
     MyAccount *acc = dynamic_cast<MyAccount *>(sender());
     Q_ASSERT(acc == m_acc.data());
     AccountInfo ai = acc->getInfo();
@@ -121,6 +170,9 @@ void Dialog::onRegParam(OnRegStateParam prm)
     if (ai.regIsActive)
     {
         ui->lblReg->setText("Reg");
+        QString myuri = QString::fromStdString(ai.uri);
+        this->setWindowTitle(myuri);
+        onOnlieStatusChanged("Online");
     }
     else
     {
@@ -138,4 +190,42 @@ void Dialog::onIM(OnInstantMessageParam prm)
         QString msg = QString::fromStdString(prm.msgBody);
         ui->txtIM->appendPlainText(time +":\n"+acc+" : "+msg);
     }
+}
+
+void Dialog::onOnlieStatusChanged(const QString &txt)
+{
+    qDebug() << Q_FUNC_INFO<<" "<<txt;
+    if (m_acc.isNull())
+        return;
+    AccountInfo ai = m_acc->getInfo();
+    if (!ai.regIsActive)
+        return;
+
+    PresenceStatus ps;
+    if (txt == "Offline")
+    {
+        ps.status = PJSUA_BUDDY_STATUS_OFFLINE;
+    }
+    else if(txt == "Online")
+    {
+        ps.status = PJSUA_BUDDY_STATUS_ONLINE;
+        ps.statusText = "online";
+    }
+    else if(txt == "Away")
+    {
+        ps.status = PJSUA_BUDDY_STATUS_ONLINE;
+        ps.activity = PJRPID_ACTIVITY_AWAY;
+        ps.note = "away";
+    }
+    else if(txt == "Busy")
+    {
+        ps.status = PJSUA_BUDDY_STATUS_ONLINE;
+        ps.activity = PJRPID_ACTIVITY_BUSY;
+        ps.note = "busy";
+    }
+    else
+    {
+        Q_ASSERT(false);
+    }
+    m_acc->setOnlineStatus(ps);
 }

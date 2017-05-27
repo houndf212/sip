@@ -33,9 +33,21 @@ void MyAccount::onRegState(OnRegStateParam &prm)
     Q_EMIT sig_RegStatus(prm);
 }
 
+// 好像这个注册没有底层没有成功，但是功能依然是好的
+void MyAccount::onIncomingSubscribe(OnIncomingSubscribeParam &prm)
+{
+    qDebug() << Q_FUNC_INFO;
+    qDebug() << prm.fromUri.c_str();
+}
+
 void MyAccount::onInstantMessage(OnInstantMessageParam &prm)
 {
     Q_EMIT sig_IM(prm);
+}
+
+void MyAccount::onInstantMessageStatus(OnInstantMessageStatusParam &prm)
+{
+    Q_EMIT sig_IM_Status(prm);
 }
 
 //void MyAccount::onIncomingCall(OnIncomingCallParam &iprm)
