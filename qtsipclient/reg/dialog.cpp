@@ -14,12 +14,12 @@ Dialog::Dialog(QWidget *parent) :
     uiConnect();
     initBuddyArea();
     //test
-    ui->txtIdUri->setText( "sip:1007@192.168.7.234" );
-    ui->txtDomain->setText( "sip:192.168.7.234" );
+    ui->txtIdUri->setText( "sip:1007@192.168.4.176" );
+    ui->txtDomain->setText( "sip:192.168.4.176" );
     ui->txtAcc->setText( "1007" );
     ui->txtPwd->setText("1234");
 
-    ui->txtBuddy->setText("sip:1001@192.168.7.234");
+    ui->txtBuddy->setText("sip:1001@192.168.4.176");
 
     resize(600, 400);
 }
@@ -31,10 +31,10 @@ Dialog::~Dialog()
 
 void Dialog::initOnlineCombo()
 {
-    ui->cmbOnlineStatus->addItem("Online");
-    ui->cmbOnlineStatus->addItem("Offline");
-    ui->cmbOnlineStatus->addItem("Away");
-    ui->cmbOnlineStatus->addItem("Busy");
+    ui->cmbOnlineStatus->addItem("online");
+    ui->cmbOnlineStatus->addItem("offline");
+    ui->cmbOnlineStatus->addItem("away");
+    ui->cmbOnlineStatus->addItem("busy");
 
     typedef void (QComboBox::*MF)(const QString&);
     MF mf = static_cast<MF>(&QComboBox::activated);
@@ -155,7 +155,7 @@ void Dialog::onBtnAddBuddy()
 
 void Dialog::onRegStart(OnRegStartedParam prm)
 {
-    qDebug() << Q_FUNC_INFO;
+    qDebug() << Q_FUNC_INFO <<" "<<prm.renew;
 }
 
 void Dialog::onRegParam(OnRegStateParam prm)
@@ -172,7 +172,7 @@ void Dialog::onRegParam(OnRegStateParam prm)
         ui->lblReg->setText("Reg");
         QString myuri = QString::fromStdString(ai.uri);
         this->setWindowTitle(myuri);
-        onOnlieStatusChanged("Online");
+        ui->cmbOnlineStatus->setCurrentText("online");
     }
     else
     {
@@ -202,26 +202,28 @@ void Dialog::onOnlieStatusChanged(const QString &txt)
         return;
 
     PresenceStatus ps;
-    if (txt == "Offline")
+
+    if (txt == "offline")
     {
         ps.status = PJSUA_BUDDY_STATUS_OFFLINE;
+        ps.statusText = txt.toStdString();
     }
-    else if(txt == "Online")
+    else if(txt == "online")
     {
         ps.status = PJSUA_BUDDY_STATUS_ONLINE;
-        ps.statusText = "online";
+        ps.statusText = txt.toStdString();
     }
-    else if(txt == "Away")
+    else if(txt == "away")
     {
         ps.status = PJSUA_BUDDY_STATUS_ONLINE;
         ps.activity = PJRPID_ACTIVITY_AWAY;
-        ps.note = "away";
+        ps.note = txt.toStdString();
     }
-    else if(txt == "Busy")
+    else if(txt == "busy")
     {
         ps.status = PJSUA_BUDDY_STATUS_ONLINE;
         ps.activity = PJRPID_ACTIVITY_BUSY;
-        ps.note = "busy";
+        ps.note = txt.toStdString();
     }
     else
     {

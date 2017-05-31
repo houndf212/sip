@@ -29,6 +29,8 @@ void BuddyWidget::setBuddy(MyAccount *myacc, MyBuddy *buddy)
 {
     m_acc = myacc;
     m_buddy = buddy;
+    // buddy 析构函数会自动从acc中删除
+    m_buddy->setParent(this);
     connect(m_buddy, &MyBuddy::sig_State,
             this, &BuddyWidget::onBuddyState);
 }
@@ -56,8 +58,7 @@ void BuddyWidget::onBtnUpdate()
 
 void BuddyWidget::onBtnDel()
 {
-    // buddy 析构函数会自动从acc中删除
-    delete m_buddy;
+
     this->deleteLater();
 }
 
