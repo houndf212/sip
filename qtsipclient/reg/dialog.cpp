@@ -14,12 +14,12 @@ Dialog::Dialog(QWidget *parent) :
     uiConnect();
     initBuddyArea();
     //test
-    ui->txtIdUri->setText( "sip:1007@192.168.4.176" );
+    ui->txtIdUri->setText( "centos<sip:1007@192.168.4.176>" );
     ui->txtDomain->setText( "sip:192.168.4.176" );
     ui->txtAcc->setText( "1007" );
     ui->txtPwd->setText("1234");
 
-    ui->txtBuddy->setText("sip:1001@192.168.4.176");
+    ui->txtBuddy->setText("iphone<sip:1001@192.168.4.176>");
 
     resize(600, 400);
 }
@@ -100,8 +100,6 @@ void Dialog::onBtnReg()
 
     acc_cfg.sipConfig.authCreds.push_back( AuthCredInfo("digest", "*",
                                                         accstr, 0, pwd) );
-    // TODO 不知道怎么添加别名 难道在 callconfig里面？
-//    acc_cfg.sipConfig.contactForced = "centos";
 
     // pres
     acc_cfg.presConfig.publishEnabled = true;
@@ -144,7 +142,7 @@ void Dialog::onBtnAddBuddy()
     BuddyConfig bc;
     bc.uri = buddyuri;
     MyBuddy* buddy = new MyBuddy;
-    buddy->create(*m_acc.data(), bc);
+    buddy->create(*m_acc, bc);
 
     BuddyWidget* bw = new BuddyWidget;
     bw->setBuddy(m_acc.data(), buddy);
